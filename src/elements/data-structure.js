@@ -10,7 +10,27 @@ export default function (namespace) {
     }
 
     toValue() {
-      return this.content && this.content.toValue();
+      let get_content = (t) => {
+        let c = t.content;
+
+        if (c === undefined)
+          return `<?${t._storedElement}>`
+
+        if ((t.element == 'dataStructure' ||
+            t.toValue === undefined ||
+            t.element == 'array'
+            ) && Array.isArray(c)) {
+          return (c.map((item) => {
+              return get_content(item)
+          }));
+        }
+
+        if (t.element == 'object' || t.element == 'enum')
+          c = t
+        return {structure: c.toValue(), id: (c.id.toValue() ? c.id.toValue() : '?')}
+      }
+
+      return get_content(this)
     }
 
     toRefract() {
